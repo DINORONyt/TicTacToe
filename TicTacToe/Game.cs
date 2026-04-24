@@ -68,7 +68,7 @@ namespace TicTacToe
                 }
             }
 
-            // Проверка столбцов
+            //Проверка столбцов
             for (int j = 0; j < 3; j++)
             {
                 if (Board[0][j] != "" &&
