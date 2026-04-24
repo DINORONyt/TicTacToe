@@ -97,7 +97,7 @@ namespace TicTacToe
             return null;
         }
 
-        // Проверка победы + вызов события
+        // Проверка победы и вызов события
         public List<(int, int)> CheckWinnerAndRaise()
         {
             var winLine = CheckWinner();
