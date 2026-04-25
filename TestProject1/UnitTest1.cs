@@ -51,7 +51,7 @@ namespace TicTacToe.Tests
         {
             var game = new Game();
             game.CurrentPlayer = Game.Player.X;
-            game.MakeMove(0, 0, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 0, Game.Player.X);  
 
             game.Reset();
 
@@ -74,7 +74,7 @@ namespace TicTacToe.Tests
             var game = new Game();
             game.CurrentPlayer = Game.Player.X;
 
-            var result = game.MakeMove(1, 1, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            var result = game.MakeMove(1, 1, Game.Player.X);  
 
             Assert.True(result);
             Assert.Equal("X", game.Board[1][1]);
@@ -89,9 +89,9 @@ namespace TicTacToe.Tests
         {
             var game = new Game();
             game.CurrentPlayer = Game.Player.X;
-            game.MakeMove(0, 0, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 0, Game.Player.X);  
 
-            var result = game.MakeMove(0, 0, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            var result = game.MakeMove(0, 0, Game.Player.X);  
 
             Assert.False(result);
             Assert.Equal("X", game.Board[0][0]); // Значение не изменилось
@@ -140,9 +140,9 @@ namespace TicTacToe.Tests
             game.CurrentPlayer = Game.Player.O;
 
             // Совершаем 3 хода для создания линии
-            game.MakeMove(r1, c1, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(r2, c2, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(r3, c3, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(r1, c1, Game.Player.O);  
+            game.MakeMove(r2, c2, Game.Player.O);  
+            game.MakeMove(r3, c3, Game.Player.O);  
 
             var winLine = game.CheckWinner();
 
@@ -163,11 +163,11 @@ namespace TicTacToe.Tests
         {
             var game = new Game();
             game.CurrentPlayer = Game.Player.X;
-            game.MakeMove(0, 0, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 0, Game.Player.X);  
             game.CurrentPlayer = Game.Player.O;
-            game.MakeMove(0, 1, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 1, Game.Player.O);  
             game.CurrentPlayer = Game.Player.X;
-            game.MakeMove(1, 1, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(1, 1, Game.Player.X);  
 
             var result = game.CheckWinner();
             Assert.Null(result);
@@ -187,9 +187,9 @@ namespace TicTacToe.Tests
             game.CurrentPlayer = Game.Player.X;
 
             // Создаем победную диагональ
-            game.MakeMove(0, 0, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(1, 1, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(2, 2, Game.Player.X);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 0, Game.Player.X);  
+            game.MakeMove(1, 1, Game.Player.X);  
+            game.MakeMove(2, 2, Game.Player.X);  
 
             Game.Player eventWinner = Game.Player.None;
             game.OnWin += (winner, line) => eventWinner = winner;
@@ -232,9 +232,9 @@ namespace TicTacToe.Tests
         {
             var game = new Game();
             game.CurrentPlayer = Game.Player.O;
-            game.MakeMove(0, 0, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(0, 1, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
-            game.MakeMove(0, 2, Game.Player.O);  // ИСПРАВЛЕНО: добавлен 3-й параметр
+            game.MakeMove(0, 0, Game.Player.O);  
+            game.MakeMove(0, 1, Game.Player.O);  
+            game.MakeMove(0, 2, Game.Player.O);  
 
             Assert.False(game.IsDraw());
         }
