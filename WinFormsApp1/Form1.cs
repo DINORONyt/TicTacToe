@@ -1,23 +1,29 @@
-using System;
+п»їusing System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace TicTacToe
 {
     public partial class Form1 : Form
     {
-        private Game game = new Game(); // Игровая логика
+        private Game game = new Game();
+
+        // isGameActive: РРіСЂР° РЅР°С‡Р°Р»Р°СЃСЊ (СЃРґРµР»Р°РЅ С…РѕС‚СЏ Р±С‹ РѕРґРёРЅ С…РѕРґ)
         private bool isGameActive = false;
+
+        // isGameOver: РРіСЂР° Р·Р°РєРѕРЅС‡РµРЅР° (РїРѕР±РµРґР° РёР»Рё РЅРёС‡СЊСЏ) вЂ” Р±Р»РѕРєРёСЂСѓРµС‚ РєР»РёРєРё
+        private bool isGameOver = false;
+
+        private Button[,] buttons = new Button[3, 3];
+
         public Form1()
         {
             InitializeComponent();
 
-            //Делаем поле статуса доступным только для чтения
             textBox1.ReadOnly = true;
 
-            // Назначение координат каждой кнопке через Tag
+            // РќР°Р·РЅР°С‡РµРЅРёРµ РєРѕРѕСЂРґРёРЅР°С‚
             button1.Tag = (0, 0);
             button2.Tag = (0, 1);
             button3.Tag = (0, 2);
@@ -28,17 +34,21 @@ namespace TicTacToe
             button8.Tag = (2, 1);
             button9.Tag = (2, 2);
 
-            // Подписка на событие победы
+            // РЎРѕС…СЂР°РЅСЏРµРј СЃСЃС‹Р»РєРё РЅР° РєРЅРѕРїРєРё
+            buttons[0, 0] = button1; buttons[0, 1] = button2; buttons[0, 2] = button3;
+            buttons[1, 0] = button4; buttons[1, 1] = button5; buttons[1, 2] = button6;
+            buttons[2, 0] = button7; buttons[2, 1] = button8; buttons[2, 2] = button9;
+
             game.OnWin += HandleWin;
         }
 
-        // Кнопка: Установить игрока X
         private void button11_Click(object sender, EventArgs e)
         {
             if (isGameActive) return;
 
             game.CurrentPlayer = Game.Player.X;
-            textBox1.Text = "Ходит X";
+            textBox1.Text = "РҐРѕРґРёС‚ X";
+            textBox1.SelectionLength = 0; // РЎРЅРёРјР°РµРј РІС‹РґРµР»РµРЅРёРµ
         }
 
         private void button12_Click(object sender, EventArgs e)
@@ -46,9 +56,10 @@ namespace TicTacToe
             if (isGameActive) return;
 
             game.CurrentPlayer = Game.Player.O;
-            textBox1.Text = "Ходит O";
+            textBox1.Text = "РҐРѕРґРёС‚ O";
+            textBox1.SelectionLength = 0; // РЎРЅРёРјР°РµРј РІС‹РґРµР»РµРЅРёРµ
         }
-        // Кнопка: Очистить поле
+
         private void buttonClear_Click(object sender, EventArgs e)
         {
             foreach (Control control in this.Controls)
@@ -62,30 +73,36 @@ namespace TicTacToe
             }
 
             game.Reset();
-            textBox1.Text = "Поле очищено!";
+            textBox1.Text = "РџРѕР»Рµ РѕС‡РёС‰РµРЅРѕ!";
+            textBox1.SelectionLength = 0; // РЎРЅРёРјР°РµРј РІС‹РґРµР»РµРЅРёРµ
 
-            // Сбрасываем состояние и разблокируем выбор игрока
             isGameActive = false;
+            isGameOver = false; // РЎР±СЂР°СЃС‹РІР°РµРј С„Р»Р°Рі РєРѕРЅС†Р° РёРіСЂС‹
             button11.Enabled = true;
             button12.Enabled = true;
         }
 
-        // Обработка хода игрока
-        // Обработка хода игрока
         private void Button_Click(object sender, EventArgs e)
         {
+            // Р•СЃР»Рё РёРіСЂР° Р·Р°РєРѕРЅС‡РµРЅР°, РёРіРЅРѕСЂРёСЂСѓРµРј РєР»РёРє
+            if (isGameOver) return;
+
             Button btn = sender as Button;
+
+            // РРіРЅРѕСЂРёСЂСѓРµРј РєР»РёРє, РµСЃР»Рё РєР»РµС‚РєР° Р·Р°РЅСЏС‚Р°
+            if (btn.Text != "") return;
+
+            // РРіРЅРѕСЂРёСЂСѓРµРј РєР»РёРє, РµСЃР»Рё РЅРµ РІС‹Р±СЂР°РЅ РёРіСЂРѕРє (X РёР»Рё O)
+            if (game.CurrentPlayer == Game.Player.None) return;
+
             var (row, col) = ((int, int))btn.Tag;
 
-            if (btn.Text != "" || game.CurrentPlayer == Game.Player.None)
-                return;
-
-            // Добавлен третий параметр - game.CurrentPlayer
-            if (!game.MakeMove(row, col, game.CurrentPlayer))
-                return;
+            if (!game.MakeMove(row, col, game.CurrentPlayer)) return;
 
             btn.Text = game.CurrentPlayer.ToString();
+            btn.ForeColor = game.CurrentPlayer == Game.Player.X ? Color.Blue : Color.Red;
 
+            // РђРєС‚РёРІРёСЂСѓРµРј РёРіСЂСѓ РїРѕСЃР»Рµ РїРµСЂРІРѕРіРѕ С…РѕРґР° (Р±Р»РѕРєРёСЂСѓРµРј РІС‹Р±РѕСЂ РёРіСЂРѕРєР°)
             if (!isGameActive)
             {
                 isGameActive = true;
@@ -95,44 +112,44 @@ namespace TicTacToe
 
             var winLine = game.CheckWinnerAndRaise();
             if (winLine != null)
+            {
+                // РџРѕР±РµРґР° РѕР±СЂР°Р±РѕС‚Р°РЅР° РІ HandleWin
                 return;
+            }
 
             if (game.IsDraw())
             {
-                textBox1.Text = "Ничья!";
+                textBox1.Text = "РќРёС‡СЊСЏ!";
+                textBox1.SelectionLength = 0;
+                isGameOver = true; // Р‘Р»РѕРєРёСЂСѓРµРј РґР°Р»СЊРЅРµР№С€РёРµ С…РѕРґС‹
                 return;
             }
 
             game.SwitchPlayer();
-            textBox1.Text = $"Ходит {game.CurrentPlayer}";
+            textBox1.Text = $"РҐРѕРґРёС‚ {game.CurrentPlayer}";
+            textBox1.SelectionLength = 0; // РЎРЅРёРјР°РµРј РІС‹РґРµР»РµРЅРёРµ
         }
-        // Обработчик события победы
+
         private void HandleWin(Game.Player winner, List<(int, int)> winLine)
         {
-            textBox1.Text = $"Победа: {winner}";
+            textBox1.Text = $"РџРѕР±РµРґР°: {winner}";
+            textBox1.SelectionLength = 0; // РЎРЅРёРјР°РµРј РІС‹РґРµР»РµРЅРёРµ
+
+            isGameOver = true; // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі РєРѕРЅС†Р° РёРіСЂС‹
+
+            
 
             foreach (var (r, c) in winLine)
             {
-                var btn = GetButtonAt(r, c);
-                if (btn != null)
-                    btn.ForeColor = Color.Red;
-            }
-        }
-
-        // Получить кнопку по координатам
-        private Button GetButtonAt(int row, int col)
-        {
-            foreach (Control control in this.Controls)
-            {
-                if (control is Button btn && btn.Tag is ValueTuple<int, int> tag)
+                if (r >= 0 && r < 3 && c >= 0 && c < 3)
                 {
-                    if (tag.Item1 == row && tag.Item2 == col)
-                        return btn;
+                    var btn = buttons[r, c];
+                    if (btn != null)
+                    {
+                        btn.ForeColor = Color.Green; // Р¤РёРіСѓСЂС‹ СЃС‚Р°РЅРѕРІСЏС‚СЃСЏ Р·РµР»С‘РЅС‹РјРё
+                    }
                 }
             }
-            return null;
         }
-
-
     }
 }
