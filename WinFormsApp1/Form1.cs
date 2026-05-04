@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TicTacToe
@@ -14,6 +13,10 @@ namespace TicTacToe
         private bool isBotMode = false;
         private readonly BotPlayer _bot = new BotPlayer();
 
+        // Динамические символы
+        private string playerSymbol = "X";
+        private string botSymbol = "O";
+
         private Button[,] buttons = new Button[3, 3];
 
         public Form1(bool botMode)
@@ -23,39 +26,22 @@ namespace TicTacToe
             InitializeBoard();
         }
 
-        // ✅ МЕТОД ИНИЦИАЛИЗАЦИИ ДОСКИ
         private void InitializeBoard()
         {
             textBox1.ReadOnly = true;
 
-            // Назначение координат кнопкам
-            button1.Tag = (0, 0);
-            button2.Tag = (0, 1);
-            button3.Tag = (0, 2);
-            button4.Tag = (1, 0);
-            button5.Tag = (1, 1);
-            button6.Tag = (1, 2);
-            button7.Tag = (2, 0);
-            button8.Tag = (2, 1);
-            button9.Tag = (2, 2);
+            button1.Tag = (0, 0); button2.Tag = (0, 1); button3.Tag = (0, 2);
+            button4.Tag = (1, 0); button5.Tag = (1, 1); button6.Tag = (1, 2);
+            button7.Tag = (2, 0); button8.Tag = (2, 1); button9.Tag = (2, 2);
 
-            // Сохраняем ссылки на кнопки в массив
-            buttons[0, 0] = button1;
-            buttons[0, 1] = button2;
-            buttons[0, 2] = button3;
-            buttons[1, 0] = button4;
-            buttons[1, 1] = button5;
-            buttons[1, 2] = button6;
-            buttons[2, 0] = button7;
-            buttons[2, 1] = button8;
-            buttons[2, 2] = button9;
+            buttons[0, 0] = button1; buttons[0, 1] = button2; buttons[0, 2] = button3;
+            buttons[1, 0] = button4; buttons[1, 1] = button5; buttons[1, 2] = button6;
+            buttons[2, 0] = button7; buttons[2, 1] = button8; buttons[2, 2] = button9;
 
-            // Подписка на событие победы
             game.OnWin += HandleWin;
 
-            // Установка начального текста
             if (isBotMode)
-                textBox1.Text = "Режим: Игрок (X) vs Бот (O)";
+                textBox1.Text = "Режим: Игрок vs Бот. Выберите сторону";
             else
                 textBox1.Text = "Режим: 2 Игрока";
         }
@@ -64,18 +50,32 @@ namespace TicTacToe
         {
             if (isGameActive) return;
 
+            playerSymbol = "X";
+            botSymbol = "O";
             game.CurrentPlayer = Game.Player.X;
-            textBox1.Text = isBotMode ? "Режим: Игрок (X) vs Бот (O)" : "Ходит X";
-            textBox1.SelectionLength = 0;
+            isGameActive = true;
+
+            button11.Enabled = false;
+            button12.Enabled = false;
+            textBox1.Text = "Ваш ход (X)";
         }
 
         private void button12_Click(object sender, EventArgs e)
         {
             if (isGameActive) return;
 
-            game.CurrentPlayer = Game.Player.O;
-            textBox1.Text = isBotMode ? "Режим: Бот (X) vs Игрок (O)" : "Ходит O";
-            textBox1.SelectionLength = 0;
+            playerSymbol = "O";
+            botSymbol = "X";
+            game.CurrentPlayer = Game.Player.X;
+
+            button11.Enabled = false;
+            button12.Enabled = false;
+            isGameActive = true;
+            textBox1.Text = "Бот думает...";
+
+            // Запуск первого хода бота с небольшой задержкой
+            System.Threading.Thread.Sleep(500);
+            MakeBotMove();
         }
 
         private void buttonClear_Click(object sender, EventArgs e)
@@ -91,15 +91,11 @@ namespace TicTacToe
             }
 
             game.Reset();
-            textBox1.Text = "Поле очищено!";
-            textBox1.SelectionLength = 0;
-
+            textBox1.Text = isBotMode ? "Режим: Игрок vs Бот. Выберите сторону" : "Поле очищено!";
             isGameActive = false;
             isGameOver = false;
             button11.Enabled = true;
             button12.Enabled = true;
-
-            textBox1.Text = isBotMode ? "Режим: Игрок (X) vs Бот (O)" : "Поле очищено!";
         }
 
         private void Button_Click(object sender, EventArgs e)
@@ -112,61 +108,70 @@ namespace TicTacToe
 
             var (row, col) = ((int, int))btn.Tag;
 
+            // Выполняем ход в логике игры
             if (!game.MakeMove(row, col, game.CurrentPlayer)) return;
 
             btn.Text = game.CurrentPlayer.ToString();
-            btn.ForeColor = game.CurrentPlayer == Game.Player.X ? Color.Blue : Color.Red;
+            btn.ForeColor = game.CurrentPlayer.ToString() == "X" ? Color.Blue : Color.Red;
 
-            if (!isGameActive)
-            {
-                isGameActive = true;
-                button11.Enabled = false;
-                button12.Enabled = false;
-            }
-
+            // Проверяем победу или ничью
             var winLine = game.CheckWinnerAndRaise();
             if (winLine != null) return;
 
             if (game.IsDraw())
             {
                 textBox1.Text = "Ничья!";
-                textBox1.SelectionLength = 0;
                 isGameOver = true;
                 DisableGameButtons();
                 return;
             }
 
+            // Передаём ход
             game.SwitchPlayer();
-            textBox1.Text = $"Ходит {game.CurrentPlayer}";
-            textBox1.SelectionLength = 0;
 
-            // Если включен режим бота и сейчас ход Бота (O)
-            if (isBotMode && game.CurrentPlayer == Game.Player.O && !isGameOver)
+            //  Если режим с ботом и сейчас ход бота
+            if (isBotMode && game.CurrentPlayer.ToString() == botSymbol && !isGameOver)
             {
-                System.Threading.Thread.Sleep(400);
+                textBox1.Text = "Бот думает...";
+                // Небольшая пауза для реалистичности
+                System.Threading.Thread.Sleep(500);
                 MakeBotMove();
+            }
+            else
+            {
+                textBox1.Text = $"Ходит {game.CurrentPlayer}";
             }
         }
 
+        // МЕТОД ХОДА БОТА
         private void MakeBotMove()
         {
+            // 1. Собираем текущее состояние поля
             string[,] boardState = new string[3, 3];
             for (int r = 0; r < 3; r++)
                 for (int c = 0; c < 3; c++)
                     boardState[r, c] = buttons[r, c].Text;
 
-            var (bestRow, bestCol) = _bot.GetBestMove(boardState, "O", "X");
+            // 2. Спрашиваем у бота лучший ход
+            var (bestRow, bestCol) = _bot.GetBestMove(boardState, botSymbol, playerSymbol);
 
+            // 3. Эмулируем клик по кнопке
             if (bestRow != -1 && bestCol != -1)
             {
-                Button_Click(buttons[bestRow, bestCol], EventArgs.Empty);
+                var targetBtn = buttons[bestRow, bestCol];
+
+                // ВАЖНО: Проверяем, не занята ли клетка (на всякий случай)
+                if (targetBtn.Text == "")
+                {
+                    // Вызываем обработчик клика напрямую
+                    Button_Click(targetBtn, EventArgs.Empty);
+                }
             }
         }
 
         private void HandleWin(Game.Player winner, List<(int, int)> winLine)
         {
             textBox1.Text = $"Победа: {winner}";
-            textBox1.SelectionLength = 0;
             isGameOver = true;
             DisableGameButtons();
 
